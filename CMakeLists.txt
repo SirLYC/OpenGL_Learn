@@ -6,16 +6,16 @@ include_directories(includes common)
 
 add_library(glad SHARED includes/glad/glad.h includes/glad/khrplatform.h libs/glad/glad.c)
 
-file(GLOB COMMON_SRC common/Common.cpp common/Common.h)
+file(GLOB COMMON_SRC common/*.cpp common/*.h)
 add_library(common SHARED ${COMMON_SRC})
+target_link_libraries(common glfw3 glad)
 
-set(EXES HelloTriangle)
-
-add_executable(HelloTriangle hellotriangle/main.cpp)
-
-target_link_libraries(HelloTriangle glfw3 glad common)
+set(EXES HelloTriangle GLSLLearn)
 
 foreach (exe ${EXES})
+    file(GLOB SRC ${exe}/*.cpp ${exe}/*.c ${exe}/*.h ${exe}/*.hpp)
+    add_executable(${exe} ${SRC})
+    target_link_libraries(${exe} glfw3 glad common)
     add_custom_command(TARGET ${exe} PRE_BUILD
             COMMAND ${CMAKE_COMMAND} -E copy_directory
             ${CMAKE_SOURCE_DIR}/shaders $<TARGET_FILE_DIR:${exe}>/shaders)

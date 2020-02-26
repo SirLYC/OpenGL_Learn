@@ -3,118 +3,90 @@
 #include <GLFW/glfw3.h>
 #include <Common.h>
 #include "ShaderUtils.h"
+#include <GLFWWrapper.h>
 
-#define ANOTHER_PROGRAM 1
+#define ANOTHER_PROGRAM 0
 
-void framebuffer_size_callback(GLFWwindow *window, int width, int height);
+class HelloTriangle : public GLFWDefaultEventLoop {
 
-void processInput(GLFWwindow *window);
+private:
+    unsigned int VAO = 0;
+    unsigned int VBO = 0;
+    unsigned int EBO = 0;
+    int programId = 0;
+    bool isInit = false;
 
 #if ANOTHER_PROGRAM
-
-void drawFrame(int, int, unsigned int);
-
-#else
-void drawFrame(int, unsigned int);
+    int anotherProgramId = 0;
 #endif
 
-int initProgram(unsigned int &, unsigned int &, unsigned int &);
+public:
+
+    ~HelloTriangle() {
+        if (VAO != 0) {
+            glDeleteVertexArrays(1, &VAO);
+            VAO = 0;
+        }
+        if (VBO != 0) {
+            glDeleteBuffers(1, &VBO);
+            VBO = 0;
+        }
+        if (EBO != 0) {
+            glDeleteBuffers(1, &EBO);
+            EBO = 0;
+        }
+        if (programId != 0) {
+            glDeleteProgram(programId);
+        }
+#if ANOTHER_PROGRAM
+        if (anotherProgramId != 0) {
+            glDeleteProgram(anotherProgramId);
+        }
+#endif
+    }
+
+    bool init() {
+        if (isInit) {
+            return true;
+        }
+        glGenVertexArrays(1, &VAO);
+        glGenBuffers(1, &VBO);
+        glGenBuffers(1, &EBO);
+        return (isInit = VAO > 0 && VBO > 0 && EBO > 0);
+    }
+
+    void onStartLoop(GLFWWrapper *wrapper) override;
+
+    void onLoop(GLFWWrapper *wrapper) override;
+
+    void onStopLoop(GLFWWrapper *wrapper) override;
+};
+
 
 int main() {
-    glfwInit();
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    GLFWwindow *window = glfwCreateWindow(800, 600, "LearOpenGL", nullptr, nullptr);
+    GLFWWrapper glfwWrapper(800, 600, "HelloTriangle");
 
-    if (window == nullptr) {
-        std::cerr << "Failed to create GLFW window" << std::endl;
-        glfwTerminate();
+    if (!glfwWrapper.init()) {
         return -1;
     }
+    glfwWrapper.addDefaultWindowConfig();
 
-    glfwMakeContextCurrent(window);
-
-    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
-
-    if (!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress)) {
-        std::cerr << "Failed to initialize GLAD" << std::endl;
+    HelloTriangle helloTriangle;
+    if (!helloTriangle.init()) {
+        return -1;
     }
+    glfwWrapper.runDefaultEventLoop(helloTriangle);
 
-    unsigned int VAO;
-    unsigned int VBO;
-    unsigned int EBO;
-
-    int programId = initProgram(VAO, VBO, EBO);
-
-#if ANOTHER_PROGRAM
-    char simpleVertexShader[512];
-    char simpleFragShader[512];
-    readFileAsText("shaders/vertex_shader.glsl", simpleVertexShader, 512);
-    readFileAsText("shaders/fragment_shader_yellow.glsl", simpleFragShader, 512);
-    int anotherProgramId = createGLProgram(simpleVertexShader, simpleFragShader);
-#endif
-
-    while (!glfwWindowShouldClose(window)) {
-        processInput(window);
-#if ANOTHER_PROGRAM
-        drawFrame(programId, anotherProgramId, VAO);
-#else
-        drawFrame(programId, VAO);
-#endif
-        glfwPollEvents();
-        glfwSwapBuffers(window);
-    }
-
-    glDeleteVertexArrays(1, &VAO);
-    glDeleteBuffers(1, &VBO);
-
-    glfwTerminate();
     return 0;
 }
 
-void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
-    glViewport(0, 0, width, height);
-}
-
-void processInput(GLFWwindow *window) {
-    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
-        glfwSetWindowShouldClose(window, true);
-    }
-}
-
-#if ANOTHER_PROGRAM
-
-void drawFrame(int programId, int anotherProgramId, unsigned int VAO)
-#else
-void drawFrame(int programId, unsigned int VAO)
-#endif
-
-{
-    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
-    glBindVertexArray(VAO);
-    glUseProgram(programId);
-#if ANOTHER_PROGRAM
-    glDrawArrays(GL_TRIANGLES, 0, 3);
-    glUseProgram(anotherProgramId);
-    glDrawArrays(GL_TRIANGLES, 1, 3);
-#else
-    //    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
-#endif
-
-    glBindVertexArray(0);
-}
-
-int initProgram(unsigned int &VAO, unsigned int &VBO, unsigned int &EBO) {
+void HelloTriangle::onStartLoop(GLFWWrapper *wrapper) {
     char simpleVertexShader[512];
     char simpleFragShader[512];
     readFileAsText("shaders/vertex_shader.glsl", simpleVertexShader, 512);
     readFileAsText("shaders/fragment_shader.glsl", simpleFragShader, 512);
-    int programId = createGLProgram(simpleVertexShader, simpleFragShader);
-    std::cout << "ProgramId=" << programId << std::endl;
+    programId = createGLProgram(simpleVertexShader, simpleFragShader);
 
     float vertices[] = {
             -0.5f, 0.5f, 0.0f,
@@ -127,10 +99,6 @@ int initProgram(unsigned int &VAO, unsigned int &VBO, unsigned int &EBO) {
             0, 1, 2,
             1, 2, 3
     };
-
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
-    glGenBuffers(1, &EBO);
 
     glBindVertexArray(VAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
@@ -145,5 +113,31 @@ int initProgram(unsigned int &VAO, unsigned int &VBO, unsigned int &EBO) {
     // 否则会修改VAO的状态
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
-    return programId;
+
+#if ANOTHER_PROGRAM
+    readFileAsText("shaders/vertex_shader.glsl", simpleVertexShader, 512);
+    readFileAsText("shaders/fragment_shader_yellow.glsl", simpleFragShader, 512);
+    anotherProgramId = createGLProgram(simpleVertexShader, simpleFragShader);
+#endif
+}
+
+void HelloTriangle::onLoop(GLFWWrapper *wrapper) {
+    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+    glBindVertexArray(VAO);
+    glUseProgram(programId);
+#if ANOTHER_PROGRAM
+    glDrawArrays(GL_TRIANGLES, 0, 3);
+    glUseProgram(anotherProgramId);
+    glDrawArrays(GL_TRIANGLES, 1, 3);
+#else
+    //    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+#endif
+
+    glBindVertexArray(0);
+}
+
+void HelloTriangle::onStopLoop(GLFWWrapper *wrapper) {
+
 }
