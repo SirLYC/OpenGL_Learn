@@ -34,10 +34,12 @@ int compileSourceShader(int type, const char *source) {
 
 int createGLProgram(const char *vertexShaderSource, const char *fragShaderSource) {
     int vertexShaderId = compileSourceShader(GL_VERTEX_SHADER, vertexShaderSource);
+    std::cout << "vertexShaderId=" << vertexShaderId << std::endl;
     if (vertexShaderId == 0) {
         return 0;
     }
     int fragShaderId = compileSourceShader(GL_FRAGMENT_SHADER, fragShaderSource);
+    std::cout << "fragShaderId=" << fragShaderId << std::endl;
     if (fragShaderId == 0) {
         return 0;
     }
