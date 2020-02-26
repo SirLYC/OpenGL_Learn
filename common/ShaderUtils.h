@@ -5,11 +5,10 @@
 #ifndef OPENGL_LEARN_SHADERUTILS_H
 #define OPENGL_LEARN_SHADERUTILS_H
 
-#include <GLFW/glfw3.h>
 #include <glad/glad.h>
 #include <iostream>
 
-int compileSourceShader(int type, const char *source) {
+inline int compileSourceShader(int type, const char *source) {
     int shaderId = glCreateShader(type);
     if (shaderId == 0) {
         return 0;
@@ -32,7 +31,7 @@ int compileSourceShader(int type, const char *source) {
     return shaderId;
 }
 
-int createGLProgram(const char *vertexShaderSource, const char *fragShaderSource) {
+inline int createGLProgram(const char *vertexShaderSource, const char *fragShaderSource) {
     int vertexShaderId = compileSourceShader(GL_VERTEX_SHADER, vertexShaderSource);
     std::cout << "vertexShaderId=" << vertexShaderId << std::endl;
     if (vertexShaderId == 0) {
