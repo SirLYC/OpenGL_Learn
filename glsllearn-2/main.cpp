@@ -1,7 +1,6 @@
 #include <GLFWWrapper.h>
 #include <ShaderUtils.h>
-#include <Common.h>
-#include <cmath>
+#include <Shader.h>
 
 #define CONTROL_COLOR 1
 
@@ -9,7 +8,7 @@ class GLSLLearn2Loop : public GLFWDefaultEventLoop {
 private:
     GLuint vertexArrayObj = 0;
     GLuint arrayBufferObj = 0;
-    int programId = 0;
+    Shader *shader = nullptr;
 
 public:
 
@@ -22,22 +21,18 @@ public:
             glDeleteBuffers(1, &arrayBufferObj);
             arrayBufferObj = 0;
         }
-        if (programId != 0) {
-            glDeleteProgram(programId);
+        if (shader != nullptr) {
+            delete (shader);
+            shader = nullptr;
         }
     }
 
     void onStartLoop(GLFWWrapper *wrapper) override {
-        char vertexShader[512];
-        char fragShader[512];
 #if CONTROL_COLOR
-        readFileAsText("res/vertex_shader_use_input.glsl", vertexShader, 512);
+        shader = new Shader("res/vertex_shader_use_input.glsl", "res/fragment_shader.glsl");
 #else
-        readFileAsText("res/vertex_shader.glsl", vertexShader, 512);
+        shader = new Shader("res/vertex_shader.glsl", "res/fragment_shader.glsl");
 #endif
-        readFileAsText("res/fragment_shader.glsl", fragShader, 512);
-        programId = createGLProgram(vertexShader, fragShader);
-
         glGenVertexArrays(1, &vertexArrayObj);
         glGenBuffers(1, &arrayBufferObj);
 
@@ -58,7 +53,7 @@ public:
         };
 #endif
         glBufferData(GL_ARRAY_BUFFER, sizeof(locations), locations, GL_STATIC_DRAW);
-        auto aPositionLocation = glGetAttribLocation(programId, "aPosition");
+        auto aPositionLocation = shader->getAttributeLocation("aPosition");
 #if CONTROL_COLOR
         glVertexAttribPointer(aPositionLocation, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), nullptr);
 #else
@@ -67,7 +62,7 @@ public:
 
         glEnableVertexAttribArray(aPositionLocation);
 #if CONTROL_COLOR
-        auto aColorLocation = glGetAttribLocation(programId, "aColor");
+        auto aColorLocation = shader->getAttributeLocation("aColor");
         glVertexAttribPointer(aColorLocation, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *) (3 * sizeof(float)));
         glEnableVertexAttribArray(aColorLocation);
 #endif
@@ -78,7 +73,9 @@ public:
     void onLoop(GLFWWrapper *wrapper) override {
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
-        glUseProgram(programId);
+        if (shader != nullptr) {
+            shader->use();
+        }
         glBindVertexArray(vertexArrayObj);
         glDrawArrays(GL_TRIANGLES, 0, 3);
         glBindVertexArray(0);
