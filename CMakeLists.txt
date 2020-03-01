@@ -10,7 +10,7 @@ file(GLOB COMMON_SRC common/*.cpp common/*.h)
 add_library(common SHARED ${COMMON_SRC})
 target_link_libraries(common glfw3 glad)
 
-set(EXES HelloTriangle GLSLLearn)
+set(EXES HelloTriangle glsllearn-1 glsllearn-2)
 
 foreach (exe ${EXES})
     file(GLOB SRC ${exe}/*.cpp ${exe}/*.c ${exe}/*.h ${exe}/*.hpp)
@@ -18,5 +18,5 @@ foreach (exe ${EXES})
     target_link_libraries(${exe} glfw3 glad common)
     add_custom_command(TARGET ${exe} PRE_BUILD
             COMMAND ${CMAKE_COMMAND} -E copy_directory
-            ${CMAKE_SOURCE_DIR}/shaders $<TARGET_FILE_DIR:${exe}>/shaders)
+            ${CMAKE_SOURCE_DIR}/${exe}/res $<TARGET_FILE_DIR:${exe}>/res)
 endforeach ()

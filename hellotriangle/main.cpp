@@ -1,6 +1,4 @@
-#include <iostream>
 #include <glad/glad.h>
-#include <GLFW/glfw3.h>
 #include <Common.h>
 #include "ShaderUtils.h"
 #include <GLFWWrapper.h>
@@ -84,8 +82,8 @@ int main() {
 void HelloTriangle::onStartLoop(GLFWWrapper *wrapper) {
     char simpleVertexShader[512];
     char simpleFragShader[512];
-    readFileAsText("shaders/vertex_shader.glsl", simpleVertexShader, 512);
-    readFileAsText("shaders/fragment_shader.glsl", simpleFragShader, 512);
+    readFileAsText("res/vertex_shader.glsl", simpleVertexShader, 512);
+    readFileAsText("res/fragment_shader.glsl", simpleFragShader, 512);
     programId = createGLProgram(simpleVertexShader, simpleFragShader);
 
     float vertices[] = {
@@ -115,8 +113,8 @@ void HelloTriangle::onStartLoop(GLFWWrapper *wrapper) {
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 #if ANOTHER_PROGRAM
-    readFileAsText("shaders/vertex_shader.glsl", simpleVertexShader, 512);
-    readFileAsText("shaders/fragment_shader_yellow.glsl", simpleFragShader, 512);
+    readFileAsText("res/vertex_shader.glsl", simpleVertexShader, 512);
+    readFileAsText("res/fragment_shader_yellow.glsl", simpleFragShader, 512);
     anotherProgramId = createGLProgram(simpleVertexShader, simpleFragShader);
 #endif
 }
