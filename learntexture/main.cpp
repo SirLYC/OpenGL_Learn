@@ -7,6 +7,9 @@
 #include <AutoRelease.h>
 #include <GLFWWrapper.h>
 #include <Shader.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 class LearnTextureLoop : public GLFWDefaultEventLoop {
 private:
@@ -22,6 +25,7 @@ private:
     GLuint vbo = 0;
     GLuint ebo = 0;
     Shader *shader = nullptr;
+    int transformLocation;
 
 public:
     ~LearnTextureLoop() {
@@ -125,6 +129,7 @@ public:
         shader->use();
         shader->setInt("texture1", 0);
         shader->setInt("texture2", 1);
+        transformLocation = shader->getUniformLocation("transform");
 
         glGenVertexArrays(1, &vao);
         glGenBuffers(1, &vbo);
@@ -158,6 +163,19 @@ public:
             glBindTexture(GL_TEXTURE_2D, texture1Obj);
             glActiveTexture(GL_TEXTURE1);
             glBindTexture(GL_TEXTURE_2D, texture2Obj);
+            glm::mat4 trans1(1.0f);
+            auto time = glfwGetTime();
+            trans1 = glm::translate(trans1, glm::vec3(0.5f, -0.5f, 0));
+            trans1 = glm::rotate(trans1, (float) time, glm::vec3(0.0, 0.0, 1.0));
+            float scale = 0.125f * ((float) sin(time)) + 3.0f / 8.0f;
+            trans1 = glm::scale(trans1, glm::vec3(scale, scale, scale));
+            glUniformMatrix4fv(transformLocation, 1, GL_FALSE, glm::value_ptr(trans1));
+            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+            glm::mat4 trans2(1.0f);
+            trans2 = glm::translate(trans2, glm::vec3(-0.5f, 0.5f, 0));
+            trans2 = glm::rotate(trans2, (float) time, glm::vec3(0.0, 0.0, 1.0));
+            trans2 = glm::scale(trans2, glm::vec3(scale, scale, scale));
+            glUniformMatrix4fv(transformLocation, 1, GL_FALSE, glm::value_ptr(trans2));
             glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
             glBindTexture(GL_TEXTURE_2D, 0);
             glActiveTexture(GL_TEXTURE0);
