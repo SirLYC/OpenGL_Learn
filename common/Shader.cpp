@@ -30,3 +30,7 @@ Shader::~Shader() {
 int Shader::getAttributeLocation(const char *name) const {
     return glGetAttribLocation(programId, name);
 }
+
+int Shader::getUniformLocation(const char *name) const {
+    return glGetUniformLocation(programId, name);
+}

@@ -13,7 +13,7 @@ target_link_libraries(common glfw3 glad)
 add_library(stbImage includes/stbImage/stb_image.h libs/stbImage/stb_image.c)
 target_compile_definitions(stbImage PUBLIC STB_IMAGE_IMPLEMENTATION)
 
-set(EXES HelloTriangle glsllearn-1 glsllearn-2)
+set(EXES HelloTriangle glsllearn-1 glsllearn-2 learntexture)
 
 foreach (exe ${EXES})
     file(GLOB SRC ${exe}/*.cpp ${exe}/*.c ${exe}/*.h ${exe}/*.hpp)
@@ -23,3 +23,5 @@ foreach (exe ${EXES})
             COMMAND ${CMAKE_COMMAND} -E copy_directory
             ${CMAKE_SOURCE_DIR}/${exe}/res $<TARGET_FILE_DIR:${exe}>/res)
 endforeach ()
+
+target_link_libraries(learntexture stbImage)

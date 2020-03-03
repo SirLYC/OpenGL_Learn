@@ -6,6 +6,7 @@
 #define OPENGL_LEARN_SHADER_H
 
 #include "Common.h"
+#include "ShaderUtils.h"
 
 class Shader {
 private:
@@ -25,6 +26,8 @@ public:
     void setFloat(const char *name, float value) const;
 
     int getAttributeLocation(const char *name) const;
+
+    int getUniformLocation(const char *name) const;
 };
 
 template<int vBufferSize, int fBufferSize>
