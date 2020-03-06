@@ -13,7 +13,7 @@ target_link_libraries(common glfw3 glad)
 add_library(stbImage includes/stbImage/stb_image.h libs/stbImage/stb_image.c)
 target_compile_definitions(stbImage PUBLIC STB_IMAGE_IMPLEMENTATION)
 
-set(EXES HelloTriangle glsllearn-1 glsllearn-2 learntexture)
+set(EXES HelloTriangle glsllearn-1 glsllearn-2 learntexture learncoords)
 
 foreach (exe ${EXES})
     file(GLOB SRC ${exe}/*.cpp ${exe}/*.c ${exe}/*.h ${exe}/*.hpp)
@@ -25,3 +25,4 @@ foreach (exe ${EXES})
 endforeach ()
 
 target_link_libraries(learntexture stbImage)
+target_link_libraries(learncoords stbImage)
